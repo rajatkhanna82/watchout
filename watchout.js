@@ -9,10 +9,12 @@ var svg = d3.select("body").append("svg")
   .append("g");
 
 
-function updateEnemies(data){
+function update(enemydata, herodata){
   //datajoin
   var enemy = svg.selectAll(".enemy")
-    .data(data, function(d){return d.id;});
+    .data(enemydata, function(d){return d.id;});
+  var hero = svg.selectAll(".hero")
+    .data(herodata, function(d){return d.id;});
 
   //update
   enemy.transition()
@@ -21,16 +23,25 @@ function updateEnemies(data){
     .attr("cy", function(d){ return d.y;})
     .attr("r", 10);
 
+
   //enter
   enemy.enter().append("svg:circle")
     .attr("class", "enemy")
     .attr("cx", function(d){ return d.x;})
     .attr("cy", function(d){ return d.y;})
     .attr("r", 10);
+  hero.enter().append("svg:circle")
+    .attr("class", "hero")
+    .attr("fill", "orange")
+    .attr("cx", function(d){ return d.x;})
+    .attr("cy", function(d){ return d.y;})
+    .attr("r", 10);
+
 
   //exit
 
 }
+
 
 function randomLocations(n){
   var locArr = [];
@@ -45,7 +56,8 @@ function randomLocations(n){
 }
 
 setInterval(function(){
-  updateEnemies(randomLocations(5));
+
+  update(randomLocations(5), [{x: height/2, y: width/2, id:"hero"}]);
 }, 2000);
 
 
