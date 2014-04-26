@@ -2,6 +2,50 @@
 
 var width = 600;
 var height = 600;
+var scoreBoard = [{id:"high", text: "High score: ", score: 0},
+            {id:"current", text: "Current score: ", score: 0},
+            {id :"collisions", text: "Collisions: ", score: 0}];
+
+var throttle = function(func, wait, options) {
+  var context, args, result;
+  var timeout = null;
+  var previous = 0;
+  options || (options = {});
+  var later = function() {
+    previous = options.leading === false ? 0 : _.now();
+    timeout = null;
+    result = func.apply(context, args);
+    context = args = null;
+  };
+  return function() {
+    var now = Date.now();
+    if (!previous && options.leading === false) previous = now;
+    var remaining = wait - (now - previous);
+    context = this;
+    args = arguments;
+    if (remaining <= 0) {
+      clearTimeout(timeout);
+      timeout = null;
+      previous = now;
+      result = func.apply(context, args);
+      context = args = null;
+    } else if (!timeout && options.trailing !== false) {
+      timeout = setTimeout(later, remaining);
+    }
+    return result;
+  };
+};
+
+var handleCollision = throttle(function(){
+  //increase collision count
+  //reset the current score
+  //if (currentscore > highscore), set highscore
+  scoreBoard[2]["score"] += 1;
+  if (scoreBoard[1]["score"] > scoreBoard[0]["score"]){
+    scoreBoard[0]["score"] = scoreBoard[1]["score"];
+  }
+  scoreBoard[1]["score"] = 0;
+}, 400, {leading:false});
 
 var drag = d3.behavior.drag()
   .on("drag", function(d,i) {
@@ -54,19 +98,23 @@ var checkCollisions = function(){
     if ( Math.abs(heroX-enemyX) < (enemyRadius+heroRadius) &&
       Math.abs(heroY-enemyY) < (enemyRadius+heroRadius)){
         //score resets or something happens
-      console.log("collision detected!");
+      handleCollision();
+      console.log("collision detected!", i);
     }
   }
+  scoreBoard[1]["score"] += 1;
 };
 
 var update = function(enemydata){
   //datajoin
+
+
   var enemy = svg.selectAll(".enemy")
     .data(enemydata, function(d){return d.id;});
 
   //update
   enemy.transition()
-    .duration(500)
+    .duration(1000)
     .attr("cx", function(d){ return d.x;})
     .attr("cy", function(d){ return d.y;})
     .attr("r", 10);
@@ -84,14 +132,28 @@ var update = function(enemydata){
 
 };
 
+var updateScoreBoard = function(){
+  //
+  var scoreBoardSelector = d3.selectAll(".scoreboard").selectAll("div")
+    .data(scoreBoard, function(d){return (d && d.id)|| d3.select(this).attr("id") ;});
 
-update(randomLocations(5));
+  scoreBoardSelector.attr("id", function(d){ return d.id;})
+    .text( function(d){ return d["text"];})
+    .append("span")
+    .text( function(d){ return d["score"];});
+}
+
+update(randomLocations(10));
 
 setInterval(function(){
-  update(randomLocations(5));
+  update(randomLocations(10));
 }, 2000);
 
-setInterval(checkCollisions, 100);
+setInterval(function(){
+  updateScoreBoard();
+}, 100);
+
+setInterval(checkCollisions, 50);
 
 
 
