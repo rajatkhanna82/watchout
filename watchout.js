@@ -51,10 +51,10 @@ var drag = d3.behavior.drag()
   .on("drag", function(d,i) {
     d.x += d3.event.dx;
     d.y += d3.event.dy;
-    d3.select(this).attr("cx", function(d){
+    d3.select(this).attr("x", function(d){
         return d.x;
       })
-    .attr("cy", function(d){
+    .attr("y", function(d){
         return d.y;
       });
 });
@@ -64,13 +64,14 @@ var svg = d3.select("body").append("svg")
     .attr("height", height)
   .append("g");
 
-var hero = svg.append("circle")
+var hero = svg.append("image")
   .data([{"x":width/2 ,"y":height/2}])
   .attr("class", "hero")
-  .attr("fill", "orange")
-  .attr("cx", function(d){return d.x;})
-  .attr("cy", function(d){return d.y;})
-  .attr("r", 10)
+  .attr("x", function(d){return d.x;})
+  .attr("y", function(d){return d.y;})
+  .attr("xlink:href", "snowman.png")
+  .attr("width", 50)
+  .attr("height",40)
   .call(drag);
 
 
@@ -89,12 +90,12 @@ var randomLocations = function(n){
 var checkCollisions = function(){
   var enemies = svg.selectAll(".enemy");
   for (var i=0; i<enemies[0].length; i++){
-    var enemyX = parseInt(enemies[0][i].getAttribute("cx"));
-    var enemyY = parseInt(enemies[0][i].getAttribute("cy"));
-    var heroX = parseInt(hero.attr("cx"));
-    var heroY = parseInt(hero.attr("cy"));
-    var enemyRadius = parseInt(enemies[0][i].getAttribute("r"));
-    var heroRadius = parseInt(hero.attr("r"));
+    var enemyX = parseInt(enemies[0][i].getAttribute("x"));
+    var enemyY = parseInt(enemies[0][i].getAttribute("y"));
+    var heroX = parseInt(hero.attr("x"));
+    var heroY = parseInt(hero.attr("y"));
+    var enemyRadius = parseInt(enemies[0][i].getAttribute("width"))/2;
+    var heroRadius = parseInt(hero.attr("width"))/2;
     if ( Math.abs(heroX-enemyX) < (enemyRadius+heroRadius) &&
       Math.abs(heroY-enemyY) < (enemyRadius+heroRadius)){
         //score resets or something happens
@@ -115,25 +116,25 @@ var update = function(enemydata){
   //update
   enemy.transition()
     .duration(1000)
-    .attr("cx", function(d){ return d.x;})
-    .attr("cy", function(d){ return d.y;})
-    .attr("r", 10);
+    .attr("x", function(d){ return d.x;})
+    .attr("y", function(d){ return d.y;})
 
 
   //enter
-  enemy.enter().append("svg:circle")
+  //enemy.enter().append("svg:circle")
+  enemy.enter().append("svg:image")
     .attr("class", "enemy")
-    .attr("cx", function(d){ return d.x;})
-    .attr("cy", function(d){ return d.y;})
-    .attr("r", 10);
-
+    .attr("x", function(d){ return d.x;})
+    .attr("y", function(d){ return d.y;})
+    .attr("xlink:href", "fireball2.png")
+    .attr("width", 60)
+    .attr("height",60);
 
   //exit
 
 };
 
 var updateScoreBoard = function(){
-  //
   var scoreBoardSelector = d3.selectAll(".scoreboard").selectAll("div")
     .data(scoreBoard, function(d){return (d && d.id)|| d3.select(this).attr("id") ;});
 
