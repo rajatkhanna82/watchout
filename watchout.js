@@ -90,10 +90,10 @@ var randomLocations = function(n){
 var checkCollisions = function(){
   var enemies = svg.selectAll(".enemy");
   for (var i=0; i<enemies[0].length; i++){
-    var enemyX = parseInt(enemies[0][i].getAttribute("x"));
-    var enemyY = parseInt(enemies[0][i].getAttribute("y"));
-    var heroX = parseInt(hero.attr("x"));
-    var heroY = parseInt(hero.attr("y"));
+    var enemyX = parseInt(enemies[0][i].getAttribute("x"))+parseInt(enemies[0][i].getAttribute("width")/2);
+    var enemyY = parseInt(enemies[0][i].getAttribute("y"))+parseInt(enemies[0][i].getAttribute("height")/2);
+    var heroX = parseInt(hero.attr("x"))+parseInt(hero.attr("width")/2);
+    var heroY = parseInt(hero.attr("y"))+parseInt(hero.attr("height")/2);
     var enemyRadius = parseInt(enemies[0][i].getAttribute("width"))/2;
     var heroRadius = parseInt(hero.attr("width"))/2;
     if ( Math.abs(heroX-enemyX) < (enemyRadius+heroRadius) &&
@@ -106,27 +106,28 @@ var checkCollisions = function(){
   scoreBoard[1]["score"] += 1;
 };
 
+var deg = 0;
 var update = function(enemydata){
   //datajoin
-
-
+  deg += 180;
   var enemy = svg.selectAll(".enemy")
     .data(enemydata, function(d){return d.id;});
 
   //update
-  enemy.transition()
+  enemy.classed("rotate", true).transition()
     .duration(1000)
     .attr("x", function(d){ return d.x;})
     .attr("y", function(d){ return d.y;})
-
+    .each("end", function(){
+      d3.select(this).classed("rotate", false);
+    });
 
   //enter
-  //enemy.enter().append("svg:circle")
   enemy.enter().append("svg:image")
     .attr("class", "enemy")
     .attr("x", function(d){ return d.x;})
     .attr("y", function(d){ return d.y;})
-    .attr("xlink:href", "fireball2.png")
+    .attr("xlink:href", "shuriken.png")
     .attr("width", 60)
     .attr("height",60);
 
@@ -144,8 +145,10 @@ var updateScoreBoard = function(){
     .text( function(d){ return d["score"];});
 }
 
+//initial setup
 update(randomLocations(10));
 
+//interval after initial
 setInterval(function(){
   update(randomLocations(10));
 }, 2000);
@@ -155,37 +158,3 @@ setInterval(function(){
 }, 100);
 
 setInterval(checkCollisions, 50);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
